@@ -3,37 +3,56 @@ package Services
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/basiqio/basiq-sdk-golang/Entities"
 )
 
 type UserService struct {
-	session Session
+	Session Session
 }
 
 func NewUserService(session *Session) *UserService {
 	return &UserService{
-		session: *session,
+		Session: *session,
 	}
 }
 
-func (us *UserService) GetUser(userId string) (Entities.User, error) {
-	body, err := us.session.api.Send("GET", "users/"+userId, nil)
-	if err != nil {
-		panic(err)
-	}
+func (us *UserService) GetUser(userId string) (User, error) {
+	var data User
 
-	var data Entities.User
+	body, err := us.Session.api.Send("GET", "users/"+userId, nil)
+	if err != nil {
+		return data, err
+	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
-		panic(err)
+		return data, err
 	}
+
+	data.Service = us
 
 	return data, err
 }
 
-func (us *UserService) ForUser(userId string) *Entities.User {
-	return &Entities.User{
-		Id: userId,
+func (us *UserService) ForUser(userId string) *User {
+	return &User{
+		Id:      userId,
+		Service: us,
 	}
+}
+
+type ConnectionList struct {
+	Count int          `json:"count"`
+	Data  []Connection `json:"data"`
+}
+
+type User struct {
+	Id          string         `json:"id"`
+	Email       string         `json:"email"`
+	Mobile      string         `json:"mobile"`
+	Connections ConnectionList `json:"connections"`
+	Service     *UserService
+}
+
+func (u *User) CreateConnection(institutionId string, loginId string, password string, securityCode string) (Job, error) {
+	return NewConnectionService(&u.Service.Session, u).NewConnection(institutionId, loginId, password, securityCode)
 }

@@ -1,4 +1,9 @@
-package Entities
+package Services
+
+type AccountsList struct {
+	Count int       `json:"count"`
+	Data  []Account `json:"data"`
+}
 
 type Account struct {
 	Id             string                 `json:"id"`

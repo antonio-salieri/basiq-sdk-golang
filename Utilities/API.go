@@ -18,7 +18,7 @@ func NewAPI(host string) *API {
 	}
 }
 
-func (api *API) Send(method string, path string, data []byte) ([]byte, error) {
+func (api *API) Send(method string, path string, data []byte) ([]byte, int, error) {
 	log.Println("Requesting: " + api.host + path)
 	var req *http.Request
 	var err error
@@ -31,7 +31,7 @@ func (api *API) Send(method string, path string, data []byte) ([]byte, error) {
 
 	c := http.Client{}
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	for k, v := range api.headers {
@@ -40,16 +40,16 @@ func (api *API) Send(method string, path string, data []byte) ([]byte, error) {
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return body, nil
+	return body, resp.StatusCode, nil
 }
 
 func (api *API) SetHeader(header string, value string) *API {

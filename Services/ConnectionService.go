@@ -43,8 +43,8 @@ func (cs *ConnectionService) GetConnection(connectionId string) (Connection, *Ut
 		}
 
 		return data, &Utilities.APIError{
-			Response: response,
-			Message:  response.GetMessages(),
+			Response:   response,
+			Message:    response.GetMessages(),
 			StatusCode: statusCode,
 		}
 	}
@@ -88,8 +88,8 @@ func (cs *ConnectionService) NewConnection(institutionId string, loginId string,
 		}
 
 		return data, &Utilities.APIError{
-			Response: response,
-			Message:  response.GetMessages(),
+			Response:   response,
+			Message:    response.GetMessages(),
 			StatusCode: statusCode,
 		}
 	}
@@ -117,8 +117,8 @@ func (cs *ConnectionService) RefreshConnection(connectionId string) (Job, *Utili
 		}
 
 		return data, &Utilities.APIError{
-			Response: response,
-			Message:  response.GetMessages(),
+			Response:   response,
+			Message:    response.GetMessages(),
 			StatusCode: statusCode,
 		}
 	}
@@ -148,8 +148,8 @@ func (cs *ConnectionService) UpdateConnection(connectionId, password string) (Jo
 		}
 
 		return data, &Utilities.APIError{
-			Response: response,
-			Message:  response.GetMessages(),
+			Response:   response,
+			Message:    response.GetMessages(),
 			StatusCode: statusCode,
 		}
 	}
@@ -160,6 +160,30 @@ func (cs *ConnectionService) UpdateConnection(connectionId, password string) (Jo
 	}
 
 	return data, nil
+}
+
+func (cs *ConnectionService) DeleteConnection(connectionId string) *Utilities.APIError {
+	var data Job
+	data.Service = cs
+
+	body, statusCode, err := cs.Session.api.Send("DELETE", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
+	if err != nil {
+		return &Utilities.APIError{Message: err.Error()}
+	}
+	if statusCode > 299 {
+		response, err := Utilities.ParseError(body)
+		if err != nil {
+			return &Utilities.APIError{Message: err.Error()}
+		}
+
+		return &Utilities.APIError{
+			Response:   response,
+			Message:    response.GetMessages(),
+			StatusCode: statusCode,
+		}
+	}
+
+	return nil
 }
 
 func (cs *ConnectionService) GetJob(jobId string) (Job, *Utilities.APIError) {
@@ -177,8 +201,8 @@ func (cs *ConnectionService) GetJob(jobId string) (Job, *Utilities.APIError) {
 		}
 
 		return data, &Utilities.APIError{
-			Response: response,
-			Message:  response.GetMessages(),
+			Response:   response,
+			Message:    response.GetMessages(),
 			StatusCode: statusCode,
 		}
 	}
@@ -197,4 +221,8 @@ func (c *Connection) Refresh() (Job, *Utilities.APIError) {
 
 func (c *Connection) Update(password string) (Job, *Utilities.APIError) {
 	return c.Service.UpdateConnection(c.Id, password)
+}
+
+func (c *Connection) Delete() *Utilities.APIError {
+	return c.Service.DeleteConnection(c.Id)
 }

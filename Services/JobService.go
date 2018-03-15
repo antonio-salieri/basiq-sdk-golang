@@ -1,10 +1,14 @@
 package Services
 
 import (
-	"errors"
 	"strings"
 	"time"
 )
+
+type APIError struct {
+	Data    map[string]interface{}
+	Message string
+}
 
 type JobStep struct {
 	Title  string                 `json:"title"`
@@ -34,7 +38,7 @@ func (j *Job) GetConnectionId() string {
 	return j.Links.Source[strings.LastIndex(j.Links.Source, "/")+1:]
 }
 
-func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, error) {
+func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, *APIError) {
 	var data Connection
 	intervalDuration := time.Duration(interval) * time.Millisecond
 	end := time.Now().Add(time.Duration(timeout) * time.Second)
@@ -44,7 +48,9 @@ func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, err
 	for {
 		current := time.Now()
 		if current.After(end) {
-			return data, errors.New("Timeout")
+			return data, &APIError{
+				Message: "Timeout",
+			}
 		}
 
 		job, err := j.Service.GetJob(j.Id)
@@ -53,9 +59,20 @@ func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, err
 		}
 
 		if job.Steps[0].Status == "failed" {
-			return data, errors.New("Credentials failure")
+			return data, &APIError{
+				Message: "Credentials failure",
+				Data: map[string]interface{}{
+					"connectionId": job.GetConnectionId(),
+				},
+			}
 		} else if job.Steps[0].Status == "success" {
-			return j.Service.GetConnection(job.GetConnectionId())
+			conn, err := j.Service.GetConnection(job.GetConnectionId())
+			if err != nil {
+				return data, &APIError{
+					Message: err.Error(),
+				}
+			}
+			return conn, nil
 		}
 
 		time.Sleep(intervalDuration)

@@ -3,7 +3,6 @@ package Services
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 )
 
 type ConnectionService struct {
@@ -45,6 +44,15 @@ func (cs *ConnectionService) GetConnection(connectionId string) (Connection, err
 	return data, err
 }
 
+func (cs *ConnectionService) ForConnection(connectionId string) (Connection, error) {
+	var data Connection
+
+	data.Service = cs
+	data.Id = connectionId
+
+	return data, nil
+}
+
 func (cs *ConnectionService) NewConnection(institutionId string, loginId string, password string, securityCode string) (Job, error) {
 	var data Job
 	data.Service = cs
@@ -78,7 +86,24 @@ func (cs *ConnectionService) RefreshConnection(connectionId string) (Job, error)
 		return data, err
 	}
 
-	log.Println(string(body))
+	if err := json.Unmarshal(body, &data); err != nil {
+		fmt.Println(string(body))
+		return data, err
+	}
+
+	return data, err
+}
+
+func (cs *ConnectionService) UpdateConnection(connectionId, password string) (Job, error) {
+	var data Job
+	data.Service = cs
+
+	jsonBody := []byte(`{"password":"` + password + `"}`)
+
+	body, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId, jsonBody)
+	if err != nil {
+		return data, err
+	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -107,4 +132,8 @@ func (cs *ConnectionService) GetJob(jobId string) (Job, error) {
 
 func (c *Connection) Refresh() (Job, error) {
 	return c.Service.RefreshConnection(c.Id)
+}
+
+func (c *Connection) Update(password string) (Job, error) {
+	return c.Service.UpdateConnection(c.Id, password)
 }

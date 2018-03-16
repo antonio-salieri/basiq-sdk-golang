@@ -34,6 +34,28 @@ func (j *Job) GetConnectionId() string {
 	return j.Links.Source[strings.LastIndex(j.Links.Source, "/")+1:]
 }
 
+func (j *Job) GetConnection() (Connection, *Utilities.APIError) {
+	var data Connection
+	var connectionId string
+
+	if j.GetConnectionId() == "" {
+		job, err := j.Service.GetJob(j.Id)
+		if err != nil {
+			return data, nil
+		}
+
+		connectionId = job.GetConnectionId()
+	} else {
+		connectionId = j.GetConnectionId()
+	}
+
+	conn, err := j.Service.GetConnection(connectionId)
+	if err != nil {
+		return data, err
+	}
+	return conn, nil
+}
+
 func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, *Utilities.APIError) {
 	var data Connection
 	intervalDuration := time.Duration(interval) * time.Millisecond

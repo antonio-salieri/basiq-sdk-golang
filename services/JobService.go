@@ -1,7 +1,7 @@
-package Services
+package services
 
 import (
-	"github.com/basiqio/basiq-sdk-golang/Utilities"
+	"github.com/basiqio/basiq-sdk-golang/errors"
 	"strings"
 	"time"
 )
@@ -34,7 +34,7 @@ func (j *Job) GetConnectionId() string {
 	return j.Links.Source[strings.LastIndex(j.Links.Source, "/")+1:]
 }
 
-func (j *Job) GetConnection() (Connection, *Utilities.APIError) {
+func (j *Job) GetConnection() (Connection, *errors.APIError) {
 	var data Connection
 	var connectionId string
 
@@ -56,7 +56,7 @@ func (j *Job) GetConnection() (Connection, *Utilities.APIError) {
 	return conn, nil
 }
 
-func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, *Utilities.APIError) {
+func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, *errors.APIError) {
 	var data Connection
 	intervalDuration := time.Duration(interval) * time.Millisecond
 	end := time.Now().Add(time.Duration(timeout) * time.Second)
@@ -66,7 +66,7 @@ func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, *Ut
 	for {
 		current := time.Now()
 		if current.After(end) {
-			return data, &Utilities.APIError{
+			return data, &errors.APIError{
 				Message: "Timeout",
 			}
 		}
@@ -77,7 +77,7 @@ func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, *Ut
 		}
 
 		if job.Steps[0].Status == "failed" {
-			return data, &Utilities.APIError{
+			return data, &errors.APIError{
 				Message: "Credentials failure",
 				Data: map[string]interface{}{
 					"connectionId": job.GetConnectionId(),

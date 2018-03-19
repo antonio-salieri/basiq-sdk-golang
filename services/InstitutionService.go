@@ -1,7 +1,7 @@
-package Services
+package services
 
 import (
-	"github.com/basiqio/basiq-sdk-golang/Utilities"
+	"github.com/basiqio/basiq-sdk-golang/errors"
 	"fmt"
 	"encoding/json"
 )
@@ -34,20 +34,20 @@ func NewInstitutionService(session *Session) *InstitutionService {
 	}
 }
 
-func (is *InstitutionService) GetInstitutions() (InstitutionsList, *Utilities.APIError) {
+func (is *InstitutionService) GetInstitutions() (InstitutionsList, *errors.APIError) {
 	var data InstitutionsList
 
 	body, statusCode, err := is.Session.api.Send("GET", "institutions", nil)
 	if err != nil {
-		return data, &Utilities.APIError{Message: err.Error()}
+		return data, &errors.APIError{Message: err.Error()}
 	}
 	if statusCode > 299 {
-		response, err := Utilities.ParseError(body)
+		response, err := errors.ParseError(body)
 		if err != nil {
-			return data, &Utilities.APIError{Message: err.Error()}
+			return data, &errors.APIError{Message: err.Error()}
 		}
 
-		return data, &Utilities.APIError{
+		return data, &errors.APIError{
 			Response:   response,
 			Message:    response.GetMessages(),
 			StatusCode: statusCode,
@@ -56,26 +56,26 @@ func (is *InstitutionService) GetInstitutions() (InstitutionsList, *Utilities.AP
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
-		return data, &Utilities.APIError{Message: err.Error()}
+		return data, &errors.APIError{Message: err.Error()}
 	}
 
 	return data, nil
 }
 
-func (is *InstitutionService) GetInstitution(institutionId string) (Institution, *Utilities.APIError) {
+func (is *InstitutionService) GetInstitution(institutionId string) (Institution, *errors.APIError) {
 	var data Institution
 
 	body, statusCode, err := is.Session.api.Send("GET", "institutions/" + institutionId, nil)
 	if err != nil {
-		return data, &Utilities.APIError{Message: err.Error()}
+		return data, &errors.APIError{Message: err.Error()}
 	}
 	if statusCode > 299 {
-		response, err := Utilities.ParseError(body)
+		response, err := errors.ParseError(body)
 		if err != nil {
-			return data, &Utilities.APIError{Message: err.Error()}
+			return data, &errors.APIError{Message: err.Error()}
 		}
 
-		return data, &Utilities.APIError{
+		return data, &errors.APIError{
 			Response:   response,
 			Message:    response.GetMessages(),
 			StatusCode: statusCode,
@@ -84,7 +84,7 @@ func (is *InstitutionService) GetInstitution(institutionId string) (Institution,
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
-		return data, &Utilities.APIError{Message: err.Error()}
+		return data, &errors.APIError{Message: err.Error()}
 	}
 
 	return data, nil

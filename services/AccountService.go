@@ -1,4 +1,4 @@
-package Services
+package services
 
 type AccountsList struct {
 	Count int       `json:"count"`

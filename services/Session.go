@@ -1,15 +1,16 @@
-package Services
+package services
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/basiqio/basiq-sdk-golang/Utilities"
+	"github.com/basiqio/basiq-sdk-golang/utilities"
+	"github.com/basiqio/basiq-sdk-golang/errors"
 	"time"
 )
 
 type Session struct {
 	apiKey string
-	api    *Utilities.API
+	api    *utilities.API
 	token  Token
 }
 
@@ -28,7 +29,7 @@ type AuthorizationResponse struct {
 func NewSession(apiKey string) *Session {
 	session := &Session{
 		apiKey: apiKey,
-		api:    Utilities.NewAPI("https://au-api.basiq.io/"),
+		api:    utilities.NewAPI("https://au-api.basiq.io/"),
 		token: Token{
 			value:     "",
 			validity:  0,
@@ -41,7 +42,7 @@ func NewSession(apiKey string) *Session {
 	return session
 }
 
-func (s *Session) getToken() (Token, *Utilities.APIError) {
+func (s *Session) getToken() (Token, *errors.APIError) {
 	var token Token
 
 	if time.Now().Sub(s.token.refreshed) < s.token.validity {
@@ -54,15 +55,15 @@ func (s *Session) getToken() (Token, *Utilities.APIError) {
 		Send("POST", "oauth2/token", nil)
 
 	if err != nil {
-		return token, &Utilities.APIError{Message: err.Error()}
+		return token, &errors.APIError{Message: err.Error()}
 	}
 	if statusCode > 299 {
-		response, err := Utilities.ParseError(body)
+		response, err := errors.ParseError(body)
 		if err != nil {
-			return token, &Utilities.APIError{Message: err.Error()}
+			return token, &errors.APIError{Message: err.Error()}
 		}
 
-		return token, &Utilities.APIError{
+		return token, &errors.APIError{
 			Response: response,
 			Message:  response.GetMessages(),
 			StatusCode: statusCode,
@@ -73,7 +74,7 @@ func (s *Session) getToken() (Token, *Utilities.APIError) {
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
-		return token, &Utilities.APIError{Message: err.Error()}
+		return token, &errors.APIError{Message: err.Error()}
 	}
 
 	s.api.SetHeader("Authorization", "Bearer "+data.AccessToken)

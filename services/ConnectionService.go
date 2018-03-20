@@ -32,22 +32,11 @@ func (cs *ConnectionService) GetConnection(connectionId string) (Connection, *er
 
 	data.Service = cs
 
-	body, statusCode, err := cs.Session.api.Send("GET", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
+	body, _, err := cs.Session.api.Send("GET", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
 	if err != nil {
-		return data, &errors.APIError{Message: err.Error()}
+		return data, err
 	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return data, &errors.APIError{Message: err.Error()}
-		}
 
-		return data, &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
-	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -77,22 +66,11 @@ func (cs *ConnectionService) NewConnection(institutionId string, loginId string,
 		jsonBody = append(jsonBody, []byte(`}`)...)
 	}
 
-	body, statusCode, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections", jsonBody)
+	body, _, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections", jsonBody)
 	if err != nil {
-		return data, &errors.APIError{Message: err.Error()}
+		return data, err
 	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return data, &errors.APIError{Message: err.Error()}
-		}
 
-		return data, &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
-	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -106,22 +84,11 @@ func (cs *ConnectionService) RefreshConnection(connectionId string) (Job, *error
 	var data Job
 	data.Service = cs
 
-	body, statusCode, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId+"/refresh", nil)
+	body, _, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId+"/refresh", nil)
 	if err != nil {
-		return data, &errors.APIError{Message: err.Error()}
+		return data, err
 	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return data, &errors.APIError{Message: err.Error()}
-		}
 
-		return data, &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
-	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -137,22 +104,11 @@ func (cs *ConnectionService) UpdateConnection(connectionId, password string) (Jo
 
 	jsonBody := []byte(`{"password":"` + password + `"}`)
 
-	body, statusCode, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId, jsonBody)
+	body, _, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId, jsonBody)
 	if err != nil {
-		return data, &errors.APIError{Message: err.Error()}
+		return data, err
 	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return data, &errors.APIError{Message: err.Error()}
-		}
 
-		return data, &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
-	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -166,21 +122,9 @@ func (cs *ConnectionService) DeleteConnection(connectionId string) *errors.APIEr
 	var data Job
 	data.Service = cs
 
-	body, statusCode, err := cs.Session.api.Send("DELETE", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
+	_, _, err := cs.Session.api.Send("DELETE", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
 	if err != nil {
-		return &errors.APIError{Message: err.Error()}
-	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return &errors.APIError{Message: err.Error()}
-		}
-
-		return &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
+		return err
 	}
 
 	return nil
@@ -190,22 +134,11 @@ func (cs *ConnectionService) GetJob(jobId string) (Job, *errors.APIError) {
 	var data Job
 	data.Service = cs
 
-	body, statusCode, err := cs.Session.api.Send("GET", "jobs/"+jobId, nil)
+	body, _, err := cs.Session.api.Send("GET", "jobs/"+jobId, nil)
 	if err != nil {
-		return data, &errors.APIError{Message: err.Error()}
+		return data, err
 	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return data, &errors.APIError{Message: err.Error()}
-		}
 
-		return data, &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
-	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))

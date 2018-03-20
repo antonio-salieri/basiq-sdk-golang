@@ -44,5 +44,5 @@ func (e *ResponseError) GetMessages() string {
 		messages = append(messages, v.Detail)
 	}
 
-	return strings.Join(messages, " ")
+	return strings.Trim(strings.Join(messages, " "), " ")
 }

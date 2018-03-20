@@ -2,6 +2,7 @@ package utilities
 
 import (
 	"bytes"
+	"github.com/basiqio/basiq-sdk-golang/errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,7 +19,7 @@ func NewAPI(host string) *API {
 	}
 }
 
-func (api *API) Send(method string, path string, data []byte) ([]byte, int, error) {
+func (api *API) Send(method string, path string, data []byte) ([]byte, int, *errors.APIError) {
 	log.Println("Requesting: " + api.host + path)
 	var req *http.Request
 	var err error
@@ -31,7 +32,7 @@ func (api *API) Send(method string, path string, data []byte) ([]byte, int, erro
 
 	c := http.Client{}
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, &errors.APIError{Message: err.Error()}
 	}
 
 	for k, v := range api.headers {
@@ -40,13 +41,26 @@ func (api *API) Send(method string, path string, data []byte) ([]byte, int, erro
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, &errors.APIError{Message: err.Error()}
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, &errors.APIError{Message: err.Error()}
+	}
+
+	if resp.StatusCode > 299 {
+		response, err := errors.ParseError(body)
+		if err != nil {
+			return nil, 0, &errors.APIError{Message: err.Error()}
+		}
+
+		return nil, 0, &errors.APIError{
+			Response:   response,
+			Message:    response.GetMessages(),
+			StatusCode: resp.StatusCode,
+		}
 	}
 
 	return body, resp.StatusCode, nil

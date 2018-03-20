@@ -3,8 +3,8 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/basiqio/basiq-sdk-golang/utilities"
 	"github.com/basiqio/basiq-sdk-golang/errors"
+	"github.com/basiqio/basiq-sdk-golang/utilities"
 	"time"
 )
 
@@ -49,25 +49,13 @@ func (s *Session) getToken() (Token, *errors.APIError) {
 		return s.token, nil
 	}
 
-	body, statusCode, err := s.api.SetHeader("Authorization", "Basic "+s.apiKey).
+	body, _, err := s.api.SetHeader("Authorization", "Basic "+s.apiKey).
 		SetHeader("basiq-version", "1.0").
 		SetHeader("content-type", "application/json").
 		Send("POST", "oauth2/token", nil)
 
 	if err != nil {
-		return token, &errors.APIError{Message: err.Error()}
-	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return token, &errors.APIError{Message: err.Error()}
-		}
-
-		return token, &errors.APIError{
-			Response: response,
-			Message:  response.GetMessages(),
-			StatusCode: statusCode,
-		}
+		return token, err
 	}
 
 	var data AuthorizationResponse

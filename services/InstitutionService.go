@@ -37,22 +37,11 @@ func NewInstitutionService(session *Session) *InstitutionService {
 func (is *InstitutionService) GetInstitutions() (InstitutionsList, *errors.APIError) {
 	var data InstitutionsList
 
-	body, statusCode, err := is.Session.api.Send("GET", "institutions", nil)
+	body, _, err := is.Session.api.Send("GET", "institutions", nil)
 	if err != nil {
-		return data, &errors.APIError{Message: err.Error()}
+		return data, err
 	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return data, &errors.APIError{Message: err.Error()}
-		}
 
-		return data, &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
-	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -65,22 +54,11 @@ func (is *InstitutionService) GetInstitutions() (InstitutionsList, *errors.APIEr
 func (is *InstitutionService) GetInstitution(institutionId string) (Institution, *errors.APIError) {
 	var data Institution
 
-	body, statusCode, err := is.Session.api.Send("GET", "institutions/" + institutionId, nil)
+	body, _, err := is.Session.api.Send("GET", "institutions/" + institutionId, nil)
 	if err != nil {
-		return data, &errors.APIError{Message: err.Error()}
+		return data, err
 	}
-	if statusCode > 299 {
-		response, err := errors.ParseError(body)
-		if err != nil {
-			return data, &errors.APIError{Message: err.Error()}
-		}
 
-		return data, &errors.APIError{
-			Response:   response,
-			Message:    response.GetMessages(),
-			StatusCode: statusCode,
-		}
-	}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))

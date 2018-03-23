@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/basiqio/basiq-sdk-golang/errors"
+	"github.com/basiqio/basiq-sdk-golang/utilities"
 )
 
 type UserService struct {
@@ -34,7 +35,6 @@ func (us *UserService) CreateUser(createData *UserData) (User, *errors.APIError)
 		return data, err
 	}
 
-
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
 		return data, &errors.APIError{Message: err.Error()}
@@ -52,7 +52,6 @@ func (us *UserService) GetUser(userId string) (User, *errors.APIError) {
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -76,7 +75,6 @@ func (us *UserService) UpdateUser(userId string, updateData *UserData) (User, *e
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -114,7 +112,6 @@ func (us *UserService) ListAllConnections(userId string) (ConnectionList, *error
 		return data, err
 	}
 
-
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
 		return data, &errors.APIError{Message: err.Error()}
@@ -123,14 +120,19 @@ func (us *UserService) ListAllConnections(userId string) (ConnectionList, *error
 	return data, nil
 }
 
-func (us *UserService) GetAccounts(userId string) (AccountsList, *errors.APIError) {
+func (us *UserService) GetAccounts(userId string, filter *utilities.FilterBuilder) (AccountsList, *errors.APIError) {
 	var data AccountsList
 
-	body, _, err := us.Session.api.Send("GET", "users/"+userId+"/accounts", nil)
+	url := "users/" + userId + "/accounts"
+
+	if filter != nil {
+		url = url + "?" + filter.GetFilter()
+	}
+
+	body, _, err := us.Session.api.Send("GET", url, nil)
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -148,7 +150,6 @@ func (us *UserService) GetAccount(userId string, accountId string) (Account, *er
 		return data, err
 	}
 
-
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
 		return data, &errors.APIError{Message: err.Error()}
@@ -157,21 +158,8 @@ func (us *UserService) GetAccount(userId string, accountId string) (Account, *er
 	return data, nil
 }
 
-func (us *UserService) GetTransactions(userId string) (TransactionsList, *errors.APIError) {
-	var data TransactionsList
-
-	body, _, err := us.Session.api.Send("GET", "users/"+userId+"/transactions", nil)
-	if err != nil {
-		return data, err
-	}
-
-
-	if err := json.Unmarshal(body, &data); err != nil {
-		fmt.Println(string(body))
-		return data, &errors.APIError{Message: err.Error()}
-	}
-
-	return data, nil
+func (us *UserService) GetTransactions(userId string, filter *utilities.FilterBuilder) (TransactionsList, *errors.APIError) {
+	return NewTransactionService(&us.Session, userId).GetTransactions(userId, filter)
 }
 
 func (us *UserService) GetTransaction(userId string, transactionId string) (Transaction, *errors.APIError) {
@@ -182,7 +170,6 @@ func (us *UserService) GetTransaction(userId string, transactionId string) (Tran
 		return data, err
 	}
 
-
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
 		return data, &errors.APIError{Message: err.Error()}
@@ -191,8 +178,8 @@ func (us *UserService) GetTransaction(userId string, transactionId string) (Tran
 	return data, nil
 }
 
-func (us *UserService) ForUser(userId string) *User {
-	return &User{
+func (us *UserService) ForUser(userId string) User {
+	return User{
 		Id:      userId,
 		Service: us,
 	}
@@ -211,8 +198,8 @@ type User struct {
 	Service     *UserService
 }
 
-func (u *User) CreateConnection(institutionId string, loginId string, password string, securityCode string) (Job, *errors.APIError) {
-	return NewConnectionService(&u.Service.Session, u).NewConnection(institutionId, loginId, password, securityCode)
+func (u *User) CreateConnection(connectionData *ConnectionData) (Job, *errors.APIError) {
+	return NewConnectionService(&u.Service.Session, u).NewConnection(connectionData)
 }
 
 func (u *User) Update(update *UserData) *errors.APIError {
@@ -242,14 +229,14 @@ func (u *User) GetAccount(accountId string) (Account, *errors.APIError) {
 	return u.Service.GetAccount(u.Id, accountId)
 }
 
-func (u *User) GetAccounts() (AccountsList, *errors.APIError) {
-	return u.Service.GetAccounts(u.Id)
+func (u *User) GetAccounts(filter *utilities.FilterBuilder) (AccountsList, *errors.APIError) {
+	return u.Service.GetAccounts(u.Id, filter)
 }
 
 func (u *User) GetTransaction(transactionId string) (Transaction, *errors.APIError) {
 	return u.Service.GetTransaction(u.Id, transactionId)
 }
 
-func (u *User) GetTransactions() (TransactionsList, *errors.APIError) {
-	return u.Service.GetTransactions(u.Id)
+func (u *User) GetTransactions(filter *utilities.FilterBuilder) (TransactionsList, *errors.APIError) {
+	return u.Service.GetTransactions(u.Id, filter)
 }

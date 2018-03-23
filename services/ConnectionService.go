@@ -20,6 +20,23 @@ type Connection struct {
 	Service     *ConnectionService
 }
 
+type InstitutionData struct {
+	Id string `json:"id"`
+}
+
+type ConnectionData struct {
+	Institution  *InstitutionData `json:"institution"`
+	LoginId      string           `json:"loginId"`
+	Password     string           `json:"password"`
+	SecurityCode string           `json:"securityCode,omitempty"`
+}
+
+type ConnectionFilter struct {
+	Id string `json:"id,omitempty"`
+	Status string `json:"status,omitempty"`
+	InstitutionId string `json:"institution.id,omitempty"`
+}
+
 func NewConnectionService(session *Session, user *User) *ConnectionService {
 	return &ConnectionService{
 		Session: *session,
@@ -36,7 +53,6 @@ func (cs *ConnectionService) GetConnection(connectionId string) (Connection, *er
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -55,22 +71,19 @@ func (cs *ConnectionService) ForConnection(connectionId string) Connection {
 	return data
 }
 
-func (cs *ConnectionService) NewConnection(institutionId string, loginId string, password string, securityCode string) (Job, *errors.APIError) {
+func (cs *ConnectionService) NewConnection(connectionData *ConnectionData) (Job, *errors.APIError) {
 	var data Job
 	data.Service = cs
 
-	jsonBody := []byte(`{"institution": {"id": "` + institutionId + `"}, "loginId": "` + loginId + `", "password":"` + password + `"`)
-	if securityCode != "" {
-		jsonBody = append(jsonBody, []byte(`, "securityCode": "`+securityCode+`"}`)...)
-	} else {
-		jsonBody = append(jsonBody, []byte(`}`)...)
+	jsonBody, errorr := json.Marshal(connectionData)
+	if errorr != nil {
+		return data, &errors.APIError{Message: errorr.Error()}
 	}
 
 	body, _, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections", jsonBody)
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -88,7 +101,6 @@ func (cs *ConnectionService) RefreshConnection(connectionId string) (Job, *error
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -108,7 +120,6 @@ func (cs *ConnectionService) UpdateConnection(connectionId, password string) (Jo
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -138,7 +149,6 @@ func (cs *ConnectionService) GetJob(jobId string) (Job, *errors.APIError) {
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))

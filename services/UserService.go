@@ -104,10 +104,15 @@ func (us *UserService) RefreshAllConnections(userId string) *errors.APIError {
 	return nil
 }
 
-func (us *UserService) ListAllConnections(userId string) (ConnectionList, *errors.APIError) {
+func (us *UserService) ListAllConnections(userId string, filter *utilities.FilterBuilder) (ConnectionList, *errors.APIError) {
 	var data ConnectionList
 
-	body, _, err := us.Session.api.Send("GET", "users/"+userId+"/connections", nil)
+	url := "users/" + userId + "/connections"
+	if filter != nil {
+		url = url + "?" + filter.GetFilter()
+	}
+
+	body, _, err := us.Session.api.Send("GET", url, nil)
 	if err != nil {
 		return data, err
 	}
@@ -221,8 +226,8 @@ func (u *User) RefreshAllConnections() *errors.APIError {
 	return u.Service.RefreshAllConnections(u.Id)
 }
 
-func (u *User) ListAllConnections() (ConnectionList, *errors.APIError) {
-	return u.Service.ListAllConnections(u.Id)
+func (u *User) ListAllConnections(filter *utilities.FilterBuilder) (ConnectionList, *errors.APIError) {
+	return u.Service.ListAllConnections(u.Id, filter)
 }
 
 func (u *User) GetAccount(accountId string) (Account, *errors.APIError) {

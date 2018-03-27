@@ -11,6 +11,21 @@ The top level object needed for SDKs functionality is the Session
 object which requires your API key to be instantiated.
 You can create a new API key on the [dashboard](http://dashboard.basiq.io).
 
+## Getting started
+
+Install the SDK using:
+
+```bash
+go get -u https://github.com/basiqio/basiq-sdk-golang/
+```
+
+Import the package:
+```go
+import (
+        "github.com/basiqio/basiq-sdk-golang/services"
+)
+```
+
 ## API
 
 The API of the SDK is manipulated using Services and Entities. Different
@@ -48,6 +63,8 @@ fields in the error object.
 
 ### SDK API List
 
+#### Services
+
 #### Session
 
 ##### Creating a new Session object
@@ -55,6 +72,8 @@ fields in the error object.
 ```go
 var session *Services.Session = Services.NewSession("YOUR_API_KEY")
 ```
+
+#### Entities
 
 #### User
 
@@ -82,7 +101,7 @@ user, err := userService.CreateUser(&Services.UserData{
 })
 ```
 
-##### Updating a user instance
+##### Updating a user instance [mut]
 
 ```go
 err := user.Update(&Services.UserData{
@@ -99,26 +118,200 @@ err := user.Delete()
 ##### Get all of the user's accounts
 
 ```go
-err := user.GetAccounts()
+accounts, err := user.GetAccounts()
 ```
 
 ##### Get a user's single account
 
 ```go
-err := user.GetAccount(accountId)
+account, err := user.GetAccount(accountId)
 ```
 
 ##### Get all of the user's transactions
 
 ```go
-err := user.GetTransactions()
+transactions, err := user.GetTransactions()
 ```
 
 ##### Get a user's single transaction
 
 ```go
-err := user.GetTransaction(transactionId)
+transaction, err := user.GetTransaction(transactionId)
 ```
 
+##### Create a new connection
 
+```go
+job, err := user.CreateConnection(&services.ConnectionData{
+         Institution: &services.InstitutionData{
+             Id: "AU00000",
+         },
+         LoginId:  "gavinBelson",
+         Password: "hooli2018",
+})
+```
 
+##### Refresh all connections
+
+```go
+err := user.RefreshAllConnections()
+```
+
+#### Connection
+
+##### Refresh a connection
+
+```go
+job, err := connection.Refresh()
+```
+
+##### Update a connection
+
+```go
+job, err := connection.Update(password)
+```
+
+##### Delete a connection
+
+```go
+err := connection.Delete()
+```
+
+#### Job
+
+##### Get the connection id (if available)
+
+```go
+connectionId := job.GetConnectionId()
+```
+
+##### Get the connection
+
+```go
+connection, err := job.GetConnection()
+```
+
+##### Get the connection after waiting for credentials step resolution
+(interval is in milliseconds, timeout is in seconds)
+
+```go
+connection, err := job.WaitForCredentials(interval, timeout)
+```
+
+##### Get the connection after waiting for transactions step resolution
+(interval is in milliseconds, timeout is in seconds)
+
+```go
+connection, err := job.WaitForTransactions(interval, timeout)
+```
+
+#### Transaction list
+
+##### Getting the next set of transactions
+
+```go
+next, err := transactions.Next()
+```
+
+### Common usage examples
+
+#### Fetching a list of institutions
+
+```go
+package main
+
+import (
+        "github.com/basiqio/basiq-sdk-golang/services"
+        "log"
+)
+
+func main() {
+        session, err := services.NewSession("YOUR_API_KEY")
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+
+        institutions, err := session.GetInstitutions()
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+}
+```
+
+#### Creating a new connection
+
+```go
+package main
+
+import (
+        "github.com/basiqio/basiq-sdk-golang/services"
+        "log"
+)
+
+func main() {
+        session, err := services.NewSession("YOUR_API_KEY")
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+
+        user := session.ForUser(userId)
+
+        job, err := user.CreateConnection(&services.ConnectionData{
+                Institution: &services.InstitutionData{
+                    Id: "AU00000",
+                },
+                LoginId:  "gavinBelson",
+                Password: "hooli2018",
+        })
+        if err != nil {
+                log.Printf("%+v", err)
+        }
+
+        // Poll our server to wait for the credentials step to be evaluated
+        connection, err := job.WaitForCredentials(1000, 60)
+        if err != nil {
+                log.Printf("%+v", err)
+        }
+}
+```
+
+#### Fetching and iterating through transactions
+
+```go
+package main
+
+import (
+        "github.com/basiqio/basiq-sdk-golang/services"
+        "log"
+)
+
+func main() {
+        session, err := services.NewSession("YOUR_API_KEY")
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+
+        user := session.ForUser(userId)
+
+        fb := utilities.FilterBuilder{}
+        fb.Eq("connection.id", "conn-id-213-id")
+        transactions, err := user.GetTransactions(&fb)
+        if err != nil {
+                log.Printf("%+v", err)
+        }
+
+        for {
+                next, err := transactions.Next()
+                if err != nil {
+                    log.Printf("%+v", err)
+                    break
+                }
+
+                if next == false {
+                    break
+                }
+
+                log.Println("Next transactions len:", len(transactions.Data))
+        }
+}
+```

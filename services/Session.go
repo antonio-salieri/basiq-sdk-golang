@@ -26,7 +26,7 @@ type AuthorizationResponse struct {
 	ExpiresIn   time.Duration `json:"expires_in"`
 }
 
-func NewSession(apiKey string) *Session {
+func NewSession(apiKey string) (*Session, *errors.APIError) {
 	session := &Session{
 		apiKey: apiKey,
 		api:    utilities.NewAPI("https://au-api.basiq.io/"),
@@ -37,9 +37,12 @@ func NewSession(apiKey string) *Session {
 		},
 	}
 
-	session.getToken()
+	_, err := session.getToken()
+	if err != nil {
+		return session, err
+	}
 
-	return session
+	return session, nil
 }
 
 func (s *Session) getToken() (Token, *errors.APIError) {

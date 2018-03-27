@@ -95,3 +95,43 @@ func (j *Job) WaitForCredentials(interval int64, timeout int64) (Connection, *er
 	}
 
 }
+
+func (j *Job) WaitForTransactions(interval int64, timeout int64) (Connection, *errors.APIError) {
+	var data Connection
+	intervalDuration := time.Duration(interval) * time.Millisecond
+	end := time.Now().Add(time.Duration(timeout) * time.Second)
+
+	time.Sleep(intervalDuration)
+
+	for {
+		current := time.Now()
+		if current.After(end) {
+			return data, &errors.APIError{
+				Message: "Timeout",
+			}
+		}
+
+		job, err := j.Service.GetJob(j.Id)
+		if err != nil {
+			return data, nil
+		}
+
+		if job.Steps[2].Status == "failed" {
+			return data, &errors.APIError{
+				Message: "Transactions fetch failure",
+				Data: map[string]interface{}{
+					"connectionId": job.GetConnectionId(),
+				},
+			}
+		} else if job.Steps[2].Status == "success" {
+			conn, err := j.Service.GetConnection(job.GetConnectionId())
+			if err != nil {
+				return data, err
+			}
+			return conn, nil
+		}
+
+		time.Sleep(intervalDuration)
+	}
+
+}

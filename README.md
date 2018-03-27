@@ -175,12 +175,13 @@ Example:
 ```go
 fb := utilities.FilterBuilder{}
 fb.Eq("connection.id", "conn-id-213-id").Gt("transaction.date", "2018-01-01")
+transactions, err := user.GetTransactions(&fb)
 ```
 
 This example filter for transactions will match all transactions for the connection
-with the id of "conn-id-213-id" and that are newer than "2018-01-01".
+with the id of "conn-id-213-id" and that are newer than "2018-01-01". All you have
+to do is pass its reference when you want to use it.
 
-Available methods
 
 ### SDK API List
 

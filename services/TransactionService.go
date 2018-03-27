@@ -32,13 +32,11 @@ type Transaction struct {
 
 type TransactionService struct {
 	Session *Session
-	UserId  string
 }
 
-func NewTransactionService(session *Session, userId string) *TransactionService {
+func NewTransactionService(session *Session) *TransactionService {
 	return &TransactionService{
 		Session: session,
-		UserId:  userId,
 	}
 }
 

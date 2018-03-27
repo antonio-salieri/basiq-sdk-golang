@@ -26,6 +26,110 @@ import (
 )
 ```
 
+
+## Common usage examples
+
+### Fetching a list of institutions
+
+```go
+package main
+
+import (
+        "github.com/basiqio/basiq-sdk-golang/services"
+        "log"
+)
+
+func main() {
+        session, err := services.NewSession("YOUR_API_KEY")
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+
+        institutions, err := session.GetInstitutions()
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+}
+```
+
+### Creating a new connection
+
+```go
+package main
+
+import (
+        "github.com/basiqio/basiq-sdk-golang/services"
+        "log"
+)
+
+func main() {
+        session, err := services.NewSession("YOUR_API_KEY")
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+
+        user := session.ForUser(userId)
+
+        job, err := user.CreateConnection(&services.ConnectionData{
+                Institution: &services.InstitutionData{
+                    Id: "AU00000",
+                },
+                LoginId:  "gavinBelson",
+                Password: "hooli2018",
+        })
+        if err != nil {
+                log.Printf("%+v", err)
+        }
+
+        // Poll our server to wait for the credentials step to be evaluated
+        connection, err := job.WaitForCredentials(1000, 60)
+        if err != nil {
+                log.Printf("%+v", err)
+        }
+}
+```
+
+### Fetching and iterating through transactions
+
+```go
+package main
+
+import (
+        "github.com/basiqio/basiq-sdk-golang/services"
+        "log"
+)
+
+func main() {
+        session, err := services.NewSession("YOUR_API_KEY")
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+
+        user := session.ForUser(userId)
+
+        fb := utilities.FilterBuilder{}
+        fb.Eq("connection.id", "conn-id-213-id")
+        transactions, err := user.GetTransactions(&fb)
+        if err != nil {
+                log.Printf("%+v", err)
+        }
+
+        for {
+                next, err := transactions.Next()
+                if err != nil {
+                    log.Printf("%+v", err)
+                    break
+                }
+
+                if next == false {
+                    break
+                }
+
+                log.Println("Next transactions len:", len(transactions.Data))
+        }
+}
+```
+
 ## API
 
 The API of the SDK is manipulated using Services and Entities. Different
@@ -61,9 +165,13 @@ type APIError struct {
 Check the [docs](https://basiq.io/api/) for more information about relevant
 fields in the error object.
 
+
 ### SDK API List
 
-#### Services
+<details>
+<summary>
+Services
+</summary>
 
 #### Session
 
@@ -73,11 +181,9 @@ fields in the error object.
 var session *Services.Session = Services.NewSession("YOUR_API_KEY")
 ```
 
-#### Entities
+#### UserService
 
-#### User
-
-The following are APIs available for the User service and entity
+The following are APIs available for the User service
 
 ##### Creating a new UserService
 
@@ -100,6 +206,152 @@ user, err := userService.CreateUser(&Services.UserData{
         Mobile: "+61410888555",
 })
 ```
+
+##### Getting a User
+
+```go
+user, err := userService.GetUser(userId)
+```
+
+##### Update a User
+
+```go
+user, err := userService.UpdateUser(userId, &Services.UserData{})
+```
+
+##### Delete a User
+
+```go
+err := userService.DeleteUser(userId)
+```
+
+##### Refresh connections
+
+```go
+err := userService.RefreshAllConnections(userId)
+```
+
+##### List all connections
+
+```go
+conns, err := userService.ListAllConnections(userId, *filter)
+```
+
+##### Get account
+
+```go
+acc, err := userService.GetAccount(userId, accountId)
+```
+
+##### Get accounts
+
+```go
+accs, err := userService.GetAccounts(userId, *filter)
+```
+
+##### Get transaction
+
+```go
+transaction, err := userService.GetTransaction(userId, transactionId)
+```
+
+##### Get transactions
+
+```go
+transactions, err := userService.GetTransactions(userId, *filter)
+```
+
+#### ConnectionService
+
+The following are APIs available for the Connection service
+
+##### Creating a new ConnectionService
+
+```go
+connService := Services.NewConnectionService(session, user)
+```
+
+##### Get connection
+
+```go
+connection, err := connService.GetConnection(connectionId)
+```
+
+##### Get connection entity with ID without performing an http request
+
+```go
+connection := connService.ForConnection(connectionId)
+```
+
+##### Create a new connection
+
+```go
+job, err := connService.NewConnection(*connectionData)
+```
+
+##### Update connection
+
+```go
+job, err := connService.UpdateConnection(connectionId, password)
+```
+
+##### Delete connection
+
+```go
+err := connService.DeleteConnection(connectionId)
+```
+
+##### Get a job
+
+```go
+job, err := connService.GetJob(jobId)
+```
+
+
+#### TransactionService
+
+The following are APIs available for the Transaction service
+
+##### Creating a new TransactionService
+
+```go
+transactionService := Services.NewTransactionService(session, userId)
+```
+
+##### Get transactions
+
+```go
+transactionList, err := transactionService.GetTransactions(userId, *filter)
+```
+
+#### InstitutionService
+
+The following are APIs available for the Institution service
+
+##### Creating a new InstitutionService
+
+```go
+instService := Services.NewInstitutionService(session, userId)
+```
+
+##### Get institutions
+
+```go
+institutions, err := instService.GetInstitutions()
+```
+
+##### Get institution
+
+```go
+institution, err := instService.GetInstitution(institutionId)
+```
+
+</details>
+
+
+<details><summary>
+Entities
+</summary>
 
 ##### Updating a user instance [mut]
 
@@ -207,111 +459,9 @@ connection, err := job.WaitForTransactions(interval, timeout)
 
 #### Transaction list
 
-##### Getting the next set of transactions
+##### Getting the next set of transactions [mut]
 
 ```go
 next, err := transactions.Next()
 ```
-
-### Common usage examples
-
-#### Fetching a list of institutions
-
-```go
-package main
-
-import (
-        "github.com/basiqio/basiq-sdk-golang/services"
-        "log"
-)
-
-func main() {
-        session, err := services.NewSession("YOUR_API_KEY")
-        if err != nil {
-            log.Printf("%+v", err)
-        }
-
-        institutions, err := session.GetInstitutions()
-        if err != nil {
-            log.Printf("%+v", err)
-        }
-}
-```
-
-#### Creating a new connection
-
-```go
-package main
-
-import (
-        "github.com/basiqio/basiq-sdk-golang/services"
-        "log"
-)
-
-func main() {
-        session, err := services.NewSession("YOUR_API_KEY")
-        if err != nil {
-            log.Printf("%+v", err)
-        }
-
-        user := session.ForUser(userId)
-
-        job, err := user.CreateConnection(&services.ConnectionData{
-                Institution: &services.InstitutionData{
-                    Id: "AU00000",
-                },
-                LoginId:  "gavinBelson",
-                Password: "hooli2018",
-        })
-        if err != nil {
-                log.Printf("%+v", err)
-        }
-
-        // Poll our server to wait for the credentials step to be evaluated
-        connection, err := job.WaitForCredentials(1000, 60)
-        if err != nil {
-                log.Printf("%+v", err)
-        }
-}
-```
-
-#### Fetching and iterating through transactions
-
-```go
-package main
-
-import (
-        "github.com/basiqio/basiq-sdk-golang/services"
-        "log"
-)
-
-func main() {
-        session, err := services.NewSession("YOUR_API_KEY")
-        if err != nil {
-            log.Printf("%+v", err)
-        }
-
-        user := session.ForUser(userId)
-
-        fb := utilities.FilterBuilder{}
-        fb.Eq("connection.id", "conn-id-213-id")
-        transactions, err := user.GetTransactions(&fb)
-        if err != nil {
-                log.Printf("%+v", err)
-        }
-
-        for {
-                next, err := transactions.Next()
-                if err != nil {
-                    log.Printf("%+v", err)
-                    break
-                }
-
-                if next == false {
-                    break
-                }
-
-                log.Println("Next transactions len:", len(transactions.Data))
-        }
-}
-```
+</details>

@@ -4,32 +4,34 @@ This is the documentation for the Golang SDK for Basiq.io API
 
 ## Introduction
 
-To view the API docs, [click here](https://basiq.io/api/).
+Basiq.io Golang SDK is a set of tools you can use to easily communicate with Basiq API.
+If you want to get familiar with the API docs, [click here](https://basiq.io/api/).
 
 The SDKs to mirror the HTTP API's functionality and hierarchy.
 The top level object needed for SDKs functionality is the Session
 object which requires your API key to be instantiated.
-You can create a new API key on the [dashboard](http://dashboard.basiq.io).
+You can grab your API key on the [dashboard](http://dashboard.basiq.io).
 
 ## Getting started
 
-Install the SDK using:
+Now that you have your API key, you can use the following command to install the SDK:
 
 ```bash
 go get -u https://github.com/basiqio/basiq-sdk-golang/
 ```
 
-Import the package:
+Next step is to import the package:
 ```go
 import (
         "github.com/basiqio/basiq-sdk-golang/services"
 )
 ```
 
-
 ## Common usage examples
 
 ### Fetching a list of institutions
+
+You can fetch a list of supported financial institutions. The function returns a list of Institution structs.
 
 ```go
 package main
@@ -53,6 +55,8 @@ func main() {
 ```
 
 ### Creating a new connection
+
+When a new connection request is made, the server will create a job that will link user's financial institution with your app. 
 
 ```go
 package main
@@ -90,6 +94,9 @@ func main() {
 ```
 
 ### Fetching and iterating through transactions
+
+In this example, the function returns a transactions list struct which is filtered by the connection.id property. You can iterate 
+through transactions list by calling Next().
 
 ```go
 package main
@@ -174,7 +181,7 @@ methods in the form of Comparison(field, value).
 Example:
 ```go
 fb := utilities.FilterBuilder{}
-fb.Eq("connection.id", "conn-id-213-id").Gt("transaction.date", "2018-01-01")
+fb.Eq("connection.id", "conn-id-213-id").Gt("transaction.postDate", "2018-01-01")
 transactions, err := user.GetTransactions(&fb)
 ```
 
@@ -195,7 +202,7 @@ Services
 ##### Creating a new Session object
 
 ```go
-var session *Services.Session = Services.NewSession("YOUR_API_KEY")
+session, err := Services.NewSession("YOUR_API_KEY")
 ```
 
 #### UserService
@@ -332,7 +339,7 @@ The following are APIs available for the Transaction service
 ##### Creating a new TransactionService
 
 ```go
-transactionService := Services.NewTransactionService(session, userId)
+transactionService := Services.NewTransactionService(session)
 ```
 
 ##### Get transactions

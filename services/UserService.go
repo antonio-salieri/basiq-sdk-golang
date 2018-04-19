@@ -164,7 +164,7 @@ func (us *UserService) GetAccount(userId string, accountId string) (Account, *er
 }
 
 func (us *UserService) GetTransactions(userId string, filter *utilities.FilterBuilder) (TransactionsList, *errors.APIError) {
-	return NewTransactionService(&us.Session, userId).GetTransactions(userId, filter)
+	return NewTransactionService(&us.Session).GetTransactions(userId, filter)
 }
 
 func (us *UserService) GetTransaction(userId string, transactionId string) (Transaction, *errors.APIError) {

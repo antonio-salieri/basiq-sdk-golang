@@ -14,6 +14,8 @@ You can grab your API key on the [dashboard](http://dashboard.basiq.io).
 
 ## Changelog
 
+1.0.1 - Documentation updated
+
 1.0.0 - Supported 2.0 API version
 
 0.9.0beta - Initial release
@@ -23,7 +25,7 @@ You can grab your API key on the [dashboard](http://dashboard.basiq.io).
 Now that you have your API key, you can use the following command to install the SDK:
 
 ```bash
-go get -u https://github.com/basiqio/basiq-sdk-golang/
+go get -u github.com/basiqio/basiq-sdk-golang/
 ```
 
 In order to instantiate Session object, following package should be imported:

@@ -14,6 +14,8 @@ You can grab your API key on the [dashboard](http://dashboard.basiq.io).
 
 ## Changelog
 
+1.0.0 - Supported 2.0 API version
+
 0.9.0beta - Initial release
 
 ## Getting started
@@ -24,10 +26,24 @@ Now that you have your API key, you can use the following command to install the
 go get -u https://github.com/basiqio/basiq-sdk-golang/
 ```
 
-Next step is to import the package:
+In order to instantiate Session object, following package should be imported:
 ```go
 import (
-        "github.com/basiqio/basiq-sdk-golang/services"
+        "github.com/basiqio/basiq-sdk-golang/basiq"
+)
+```
+
+Services for API version 1.0 are located in v1 package:
+```go
+import (
+        "github.com/basiqio/basiq-sdk-golang/v1"
+)
+```
+
+Services for API version 2.0 are located in v2 package:
+```go
+import (
+        "github.com/basiqio/basiq-sdk-golang/v2"
 )
 ```
 
@@ -41,12 +57,35 @@ You can fetch a list of supported financial institutions. The function returns a
 package main
 
 import (
-        "github.com/basiqio/basiq-sdk-golang/services"
+        "github.com/basiqio/basiq-sdk-golang/basiq"
         "log"
 )
 
 func main() {
-        session, err := services.NewSession("YOUR_API_KEY")
+        session, err := basiq.NewSessionV1("YOUR_API_KEY")
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+
+        institutions, err := session.GetInstitutions()
+        if err != nil {
+            log.Printf("%+v", err)
+        }
+}
+```
+
+Fetching institutions v2.0:
+
+```go
+package main
+
+import (
+        "github.com/basiqio/basiq-sdk-golang/basiq"
+        "log"
+)
+
+func main() {
+        session, err := basiq.NewSessionV2("YOUR_API_KEY")
         if err != nil {
             log.Printf("%+v", err)
         }
@@ -66,12 +105,12 @@ When a new connection request is made, the server will create a job that will li
 package main
 
 import (
-        "github.com/basiqio/basiq-sdk-golang/services"
+        "github.com/basiqio/basiq-sdk-golang/basiq"
         "log"
 )
 
 func main() {
-        session, err := services.NewSession("YOUR_API_KEY")
+        session, err := basiq.NewSessionV1("YOUR_API_KEY")
         if err != nil {
             log.Printf("%+v", err)
         }
@@ -106,12 +145,12 @@ through transactions list by calling Next().
 package main
 
 import (
-        "github.com/basiqio/basiq-sdk-golang/services"
+        "github.com/basiqio/basiq-sdk-golang/basiq"
         "log"
 )
 
 func main() {
-        session, err := services.NewSession("YOUR_API_KEY")
+        session, err := basiq.NewSessionV1("YOUR_API_KEY")
         if err != nil {
             log.Printf("%+v", err)
         }
@@ -205,8 +244,14 @@ Services
 
 ##### Creating a new Session object
 
+##### Version 1.0.
 ```go
-session, err := Services.NewSession("YOUR_API_KEY")
+session, err := basiq.NewSessionV1("YOUR_API_KEY")
+```
+
+##### Version 2.0.
+```go
+session, err := basiq.NewSessionV2("YOUR_API_KEY")
 ```
 
 #### UserService
@@ -216,7 +261,12 @@ The following are APIs available for the User service
 ##### Creating a new UserService
 
 ```go
-userService := Services.NewUserService(session)
+userService := v1.NewUserService(session)
+```
+
+##### Version 2.0.
+```go
+userService := v2.NewUserService(session)
 ```
 
 ##### Referencing a user
@@ -296,7 +346,12 @@ The following are APIs available for the Connection service
 ##### Creating a new ConnectionService
 
 ```go
-connService := Services.NewConnectionService(session, user)
+connService := v1.NewConnectionService(session, user)
+```
+
+##### Version 2.0.
+```go
+connService := v2.NewConnectionService(session, user)
 ```
 
 ##### Get connection
@@ -343,7 +398,12 @@ The following are APIs available for the Transaction service
 ##### Creating a new TransactionService
 
 ```go
-transactionService := Services.NewTransactionService(session)
+transactionService := v1.NewTransactionService(session)
+```
+
+##### Version 2.0.
+```go
+transactionService := v2.NewTransactionService(session)
 ```
 
 ##### Get transactions

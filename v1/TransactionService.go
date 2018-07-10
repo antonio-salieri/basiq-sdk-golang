@@ -1,11 +1,12 @@
-package services
+package v1
 
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/basiqio/basiq-sdk-golang/errors"
 	"github.com/basiqio/basiq-sdk-golang/utilities"
-	"strings"
 )
 
 type TransactionsList struct {
@@ -49,7 +50,7 @@ func (ts *TransactionService) GetTransactions(userId string, filter *utilities.F
 		url = url + "?" + filter.GetFilter()
 	}
 
-	body, _, err := ts.Session.api.Send("GET", url, nil)
+	body, _, err := ts.Session.Api.Send("GET", url, nil)
 	if err != nil {
 		return data, err
 	}
@@ -69,7 +70,7 @@ func (tl *TransactionsList) Next() (bool, *errors.APIError) {
 
 	if next, ok := tl.Links["next"]; ok {
 		nextPath := next[strings.LastIndex(next, ".io/")+4:]
-		body, _, err := tl.Service.Session.api.Send("GET", nextPath, nil)
+		body, _, err := tl.Service.Session.Api.Send("GET", nextPath, nil)
 		if err != nil {
 			return false, err
 		}

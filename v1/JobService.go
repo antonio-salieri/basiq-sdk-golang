@@ -1,9 +1,10 @@
-package services
+package v1
 
 import (
-	"github.com/basiqio/basiq-sdk-golang/errors"
 	"strings"
 	"time"
+
+	"github.com/basiqio/basiq-sdk-golang/errors"
 )
 
 type JobStep struct {

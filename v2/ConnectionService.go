@@ -1,8 +1,9 @@
-package services
+package v2
 
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/basiqio/basiq-sdk-golang/errors"
 )
 
@@ -32,8 +33,8 @@ type ConnectionData struct {
 }
 
 type ConnectionFilter struct {
-	Id string `json:"id,omitempty"`
-	Status string `json:"status,omitempty"`
+	Id            string `json:"id,omitempty"`
+	Status        string `json:"status,omitempty"`
 	InstitutionId string `json:"institution.id,omitempty"`
 }
 
@@ -49,7 +50,7 @@ func (cs *ConnectionService) GetConnection(connectionId string) (Connection, *er
 
 	data.Service = cs
 
-	body, _, err := cs.Session.api.Send("GET", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
+	body, _, err := cs.Session.Api.Send("GET", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
 	if err != nil {
 		return data, err
 	}
@@ -63,12 +64,10 @@ func (cs *ConnectionService) GetConnection(connectionId string) (Connection, *er
 }
 
 func (cs *ConnectionService) ForConnection(connectionId string) Connection {
-	var data Connection
-
-	data.Service = cs
-	data.Id = connectionId
-
-	return data
+	return Connection{
+		Service: cs,
+		Id:      connectionId,
+	}
 }
 
 func (cs *ConnectionService) NewConnection(connectionData *ConnectionData) (Job, *errors.APIError) {
@@ -80,7 +79,7 @@ func (cs *ConnectionService) NewConnection(connectionData *ConnectionData) (Job,
 		return data, &errors.APIError{Message: errorr.Error()}
 	}
 
-	body, _, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections", jsonBody)
+	body, _, err := cs.Session.Api.Send("POST", "users/"+cs.user.Id+"/connections", jsonBody)
 	if err != nil {
 		return data, err
 	}
@@ -97,7 +96,7 @@ func (cs *ConnectionService) RefreshConnection(connectionId string) (Job, *error
 	var data Job
 	data.Service = cs
 
-	body, _, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId+"/refresh", nil)
+	body, _, err := cs.Session.Api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId+"/refresh", nil)
 	if err != nil {
 		return data, err
 	}
@@ -116,7 +115,7 @@ func (cs *ConnectionService) UpdateConnection(connectionId, password string) (Jo
 
 	jsonBody := []byte(`{"password":"` + password + `"}`)
 
-	body, _, err := cs.Session.api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId, jsonBody)
+	body, _, err := cs.Session.Api.Send("POST", "users/"+cs.user.Id+"/connections/"+connectionId, jsonBody)
 	if err != nil {
 		return data, err
 	}
@@ -133,7 +132,7 @@ func (cs *ConnectionService) DeleteConnection(connectionId string) *errors.APIEr
 	var data Job
 	data.Service = cs
 
-	_, _, err := cs.Session.api.Send("DELETE", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
+	_, _, err := cs.Session.Api.Send("DELETE", "users/"+cs.user.Id+"/connections/"+connectionId, nil)
 	if err != nil {
 		return err
 	}
@@ -145,7 +144,7 @@ func (cs *ConnectionService) GetJob(jobId string) (Job, *errors.APIError) {
 	var data Job
 	data.Service = cs
 
-	body, _, err := cs.Session.api.Send("GET", "jobs/"+jobId, nil)
+	body, _, err := cs.Session.Api.Send("GET", "jobs/"+jobId, nil)
 	if err != nil {
 		return data, err
 	}

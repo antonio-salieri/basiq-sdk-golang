@@ -1,22 +1,32 @@
-package services
+package v2
 
 import (
-	"github.com/basiqio/basiq-sdk-golang/errors"
-	"fmt"
 	"encoding/json"
+	"fmt"
+
+	"github.com/basiqio/basiq-sdk-golang/errors"
 )
 
 type Institution struct {
-	Id              string                 `json:"id"`
-	Name            string                 `json:"name"`
-	ShortName       string                 `json:"shortName"`
-	Country         string                 `json:"country"`
-	ServiceName     string                 `json:"serviceName"`
-	ServiceType     string                 `json:"serviceType"`
-	LoginIdCaption  string                 `json:"loginIdCaption"`
-	PasswordCaption string                 `json:"PasswordCaption"`
-	Colors          map[string]interface{} `json:"colors"`
-	Logo            map[string]interface{} `json:"logo"`
+	Id              string `json:"id"`
+	Name            string `json:"name"`
+	ShortName       string `json:"shortName"`
+	Country         string `json:"country"`
+	ServiceName     string `json:"serviceName"`
+	ServiceType     string `json:"serviceType"`
+	LoginIdCaption  string `json:"loginIdCaption"`
+	PasswordCaption string `json:"PasswordCaption"`
+	Logo            struct {
+		Type   string `json:"type"`
+		Colors string `json:"colors"`
+		Links  struct {
+			Square string `json:"square"`
+			Full   string `json:"full"`
+		} `json:"links"`
+	} `json:"logo"`
+	Links struct {
+		Self string `json:"self"`
+	} `json:"links"`
 }
 
 type InstitutionsList struct {
@@ -37,11 +47,10 @@ func NewInstitutionService(session *Session) *InstitutionService {
 func (is *InstitutionService) GetInstitutions() (InstitutionsList, *errors.APIError) {
 	var data InstitutionsList
 
-	body, _, err := is.Session.api.Send("GET", "institutions", nil)
+	body, _, err := is.Session.Api.Send("GET", "institutions", nil)
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))
@@ -54,11 +63,10 @@ func (is *InstitutionService) GetInstitutions() (InstitutionsList, *errors.APIEr
 func (is *InstitutionService) GetInstitution(institutionId string) (Institution, *errors.APIError) {
 	var data Institution
 
-	body, _, err := is.Session.api.Send("GET", "institutions/" + institutionId, nil)
+	body, _, err := is.Session.Api.Send("GET", "institutions/"+institutionId, nil)
 	if err != nil {
 		return data, err
 	}
-
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		fmt.Println(string(body))

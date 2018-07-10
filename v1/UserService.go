@@ -1,8 +1,9 @@
-package services
+package v1
 
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/basiqio/basiq-sdk-golang/errors"
 	"github.com/basiqio/basiq-sdk-golang/utilities"
 )
@@ -30,7 +31,7 @@ func (us *UserService) CreateUser(createData *UserData) (User, *errors.APIError)
 		return data, &errors.APIError{Message: errorr.Error()}
 	}
 
-	body, _, err := us.Session.api.Send("POST", "users", jsonBody)
+	body, _, err := us.Session.Api.Send("POST", "users", jsonBody)
 	if err != nil {
 		return data, err
 	}
@@ -48,7 +49,7 @@ func (us *UserService) CreateUser(createData *UserData) (User, *errors.APIError)
 func (us *UserService) GetUser(userId string) (User, *errors.APIError) {
 	var data User
 
-	body, _, err := us.Session.api.Send("GET", "users/"+userId, nil)
+	body, _, err := us.Session.Api.Send("GET", "users/"+userId, nil)
 	if err != nil {
 		return data, err
 	}
@@ -71,7 +72,7 @@ func (us *UserService) UpdateUser(userId string, updateData *UserData) (User, *e
 		return data, &errors.APIError{Message: errorr.Error()}
 	}
 
-	body, _, err := us.Session.api.Send("POST", "users/"+userId, jsonBody)
+	body, _, err := us.Session.Api.Send("POST", "users/"+userId, jsonBody)
 	if err != nil {
 		return data, err
 	}
@@ -87,7 +88,7 @@ func (us *UserService) UpdateUser(userId string, updateData *UserData) (User, *e
 }
 
 func (us *UserService) DeleteUser(userId string) *errors.APIError {
-	_, _, err := us.Session.api.Send("DELETE", "users/"+userId, nil)
+	_, _, err := us.Session.Api.Send("DELETE", "users/"+userId, nil)
 	if err != nil {
 		return err
 	}
@@ -96,7 +97,7 @@ func (us *UserService) DeleteUser(userId string) *errors.APIError {
 }
 
 func (us *UserService) RefreshAllConnections(userId string) *errors.APIError {
-	_, _, err := us.Session.api.Send("POST", "users/"+userId+"/connections/refresh", nil)
+	_, _, err := us.Session.Api.Send("POST", "users/"+userId+"/connections/refresh", nil)
 	if err != nil {
 		return err
 	}
@@ -112,7 +113,7 @@ func (us *UserService) ListAllConnections(userId string, filter *utilities.Filte
 		url = url + "?" + filter.GetFilter()
 	}
 
-	body, _, err := us.Session.api.Send("GET", url, nil)
+	body, _, err := us.Session.Api.Send("GET", url, nil)
 	if err != nil {
 		return data, err
 	}
@@ -134,7 +135,7 @@ func (us *UserService) GetAccounts(userId string, filter *utilities.FilterBuilde
 		url = url + "?" + filter.GetFilter()
 	}
 
-	body, _, err := us.Session.api.Send("GET", url, nil)
+	body, _, err := us.Session.Api.Send("GET", url, nil)
 	if err != nil {
 		return data, err
 	}
@@ -150,7 +151,7 @@ func (us *UserService) GetAccounts(userId string, filter *utilities.FilterBuilde
 func (us *UserService) GetAccount(userId string, accountId string) (Account, *errors.APIError) {
 	var data Account
 
-	body, _, err := us.Session.api.Send("GET", "users/"+userId+"/accounts/"+accountId, nil)
+	body, _, err := us.Session.Api.Send("GET", "users/"+userId+"/accounts/"+accountId, nil)
 	if err != nil {
 		return data, err
 	}
@@ -170,7 +171,7 @@ func (us *UserService) GetTransactions(userId string, filter *utilities.FilterBu
 func (us *UserService) GetTransaction(userId string, transactionId string) (Transaction, *errors.APIError) {
 	var data Transaction
 
-	body, _, err := us.Session.api.Send("GET", "users/"+userId+"/transactions/"+transactionId, nil)
+	body, _, err := us.Session.Api.Send("GET", "users/"+userId+"/transactions/"+transactionId, nil)
 	if err != nil {
 		return data, err
 	}

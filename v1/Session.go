@@ -6,9 +6,20 @@ import (
 )
 
 type Session struct {
-	ApiKey string
-	Api    *utilities.API
-	Token  *utilities.Token
+	ApiKey     string
+	ApiVersion string
+	Api        *utilities.API
+	Token      *utilities.Token
+}
+
+func (s *Session) RefreshToken() *errors.APIError {
+	token, err := utilities.GetToken(s.ApiKey, "1.0")
+	if err != nil {
+		return err
+	}
+	s.Token = token
+	s.Api.SetHeader("Authorization", "Bearer "+token.Value)
+	return nil
 }
 
 func (s *Session) CreateUser(createData *UserData) (User, *errors.APIError) {

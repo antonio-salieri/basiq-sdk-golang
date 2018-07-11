@@ -14,6 +14,8 @@ You can grab your API key on the [dashboard](http://dashboard.basiq.io).
 
 ## Changelog
 
+1.0.2 - Documentation updated, added RefreshToken method on the Session object
+
 1.0.1 - Documentation updated
 
 1.0.0 - Supported 2.0 API version
@@ -256,6 +258,34 @@ session, err := basiq.NewSessionV1("YOUR_API_KEY")
 session, err := basiq.NewSessionV2("YOUR_API_KEY")
 ```
 
+##### Refreshing a token
+```go
+err := session.RefreshToken()
+```
+
+##### Getting institutions
+```go
+institutions, err := session.GetInstitutions()
+```
+
+##### Getting institution
+```go
+institution, err := session.GetInstitution("INSTITUTION_ID")
+```
+
+##### Creating a new user
+```go
+user, err := session.CreateUser(userData)
+```
+
+##### Referencing a user
+*Note: The following action will not send an HTTP request, and can be used
+to perform additional actions for the instantiated user.*
+
+```go
+user := session.ForUser(userId)
+```
+
 #### UserService
 
 The following are APIs available for the User service
@@ -421,7 +451,12 @@ The following are APIs available for the Institution service
 ##### Creating a new InstitutionService
 
 ```go
-instService := Services.NewInstitutionService(session, userId)
+instService := v1.NewInstitutionService(session, userId)
+```
+
+##### Version 2.0.
+```go
+instService := v2.NewInstitutionService(session, userId)
 ```
 
 ##### Get institutions

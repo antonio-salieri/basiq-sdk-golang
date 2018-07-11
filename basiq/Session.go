@@ -11,8 +11,9 @@ import (
 
 func NewSessionV1(apiKey string) (*v1.Session, *errors.APIError) {
 	session := &v1.Session{
-		ApiKey: apiKey,
-		Api:    utilities.NewAPI("https://au-api.basiq.io/"),
+		ApiKey:     apiKey,
+		ApiVersion: "1.0",
+		Api:        utilities.NewAPI("https://au-api.basiq.io/"),
 		Token: &utilities.Token{
 			Value:     "",
 			Validity:  0,
@@ -20,7 +21,7 @@ func NewSessionV1(apiKey string) (*v1.Session, *errors.APIError) {
 		},
 	}
 
-	token, err := utilities.GetToken(apiKey, "1.0")
+	token, err := utilities.GetToken(apiKey, session.ApiVersion)
 	if err != nil {
 		return session, err
 	}
@@ -32,8 +33,9 @@ func NewSessionV1(apiKey string) (*v1.Session, *errors.APIError) {
 
 func NewSessionV2(apiKey string) (*v2.Session, *errors.APIError) {
 	session := &v2.Session{
-		ApiKey: apiKey,
-		Api:    utilities.NewAPI("https://au-api.basiq.io/"),
+		ApiKey:     apiKey,
+		ApiVersion: "2.0",
+		Api:        utilities.NewAPI("https://au-api.basiq.io/"),
 		Token: &utilities.Token{
 			Value:     "",
 			Validity:  0,
@@ -41,7 +43,7 @@ func NewSessionV2(apiKey string) (*v2.Session, *errors.APIError) {
 		},
 	}
 
-	token, err := utilities.GetToken(apiKey, "2.0")
+	token, err := utilities.GetToken(apiKey, session.ApiVersion)
 	if err != nil {
 		return session, err
 	}

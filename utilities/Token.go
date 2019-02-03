@@ -24,7 +24,7 @@ func GetToken(apiKey, apiVersion string) (*Token, *errors.APIError) {
 	body, _, err := NewAPI("https://au-api.basiq.io/").SetHeader("Authorization", "Basic "+apiKey).
 		SetHeader("basiq-version", apiVersion).
 		SetHeader("content-type", "application/json").
-		Send("POST", "oauth2/token", nil)
+		Send("POST", "token", nil)
 	if err != nil {
 		return nil, err
 	}
